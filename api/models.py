@@ -11,8 +11,6 @@ class Recipe(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Nombre")
     slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name="URL Slug")
-    ingredients = models.TextField(verbose_name="Ingredientes", help_text="Ej: 2 tomates, 1 cebolla...")
-    preparation = models.TextField(verbose_name="Preparación", help_text="Pasos a seguir para cocinar.")
     meal_type = models.CharField(max_length=3, choices=MEAL_CHOICES, verbose_name="Tipo de comida")
     is_featured = models.BooleanField(default=False, verbose_name="Destacada", help_text="Marcar para que aparezca en recetas populares.")
     
@@ -28,3 +26,22 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_meal_type_display()})"
+
+class Ingredient(models.Model):
+    recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, verbose_name="Ingrediente (ej: Tomates)")
+    quantity = models.CharField(max_length=100, verbose_name="Cantidad (ej: 2 piezas o 500g)")
+
+    def __str__(self):
+        return f"{self.quantity} de {self.name}"
+
+class PreparationStep(models.Model):
+    recipe = models.ForeignKey(Recipe, related_name='steps', on_delete=models.CASCADE)
+    step_number = models.PositiveIntegerField(verbose_name="Número de paso")
+    instruction = models.TextField(verbose_name="Instrucción")
+
+    class Meta:
+        ordering = ['step_number']
+
+    def __str__(self):
+        return f"Paso {self.step_number}"
