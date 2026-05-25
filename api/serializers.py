@@ -9,7 +9,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class PreparationStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreparationStep
-        fields = ['id', 'step_number', 'instruction']
+        fields = ['id', 'fase_name', 'show_name', 'step_number', 'instruction']
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True, read_only=True)

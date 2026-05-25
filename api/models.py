@@ -36,6 +36,8 @@ class Ingredient(models.Model):
         return f"{self.quantity} de {self.name}"
 
 class PreparationStep(models.Model):
+    fase_name = models.CharField(max_length=100, verbose_name="Fase (ej: Preparación, Cocción, Montaje)", blank=True)
+    show_name = models.BooleanField(default=False, verbose_name="Mostrar nombre de la fase en la receta?")
     recipe = models.ForeignKey(Recipe, related_name='steps', on_delete=models.CASCADE)
     step_number = models.PositiveIntegerField(verbose_name="Número de paso")
     instruction = models.TextField(verbose_name="Instrucción")
