@@ -9,9 +9,11 @@ class Recipe(models.Model):
         ('ROE', 'Refrigerios o Entradas'),
     ]
 
+    recipe_image = models.ImageField(upload_to='recipes/', null=True, blank=True, verbose_name="Imagen de la receta")
     name = models.CharField(max_length=200, verbose_name="Nombre")
     slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name="URL Slug")
     meal_type = models.CharField(max_length=3, choices=MEAL_CHOICES, verbose_name="Tipo de comida")
+    preparation_time = models.CharField(max_length=100, verbose_name="Tiempo de preparación (ej: 30 minutos)", blank=True)
     is_featured = models.BooleanField(default=False, verbose_name="Destacada", help_text="Marcar para que aparezca en recetas populares.")
     
     # Optional but recommended fields:
