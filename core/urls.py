@@ -25,4 +25,6 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
+    # Serve recipe image files stored in the project root recipes/ folder under /media/recipes/
+    urlpatterns += static(settings.MEDIA_URL + 'recipes/', document_root=settings.BASE_DIR / 'recipes')
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
