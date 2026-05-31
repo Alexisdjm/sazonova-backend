@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Recipe, Ingredient, PreparationStep
+from .models import Recipe, Ingredient, PreparationStep, DistributorRequest
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,3 +28,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         if request is not None:
             return request.build_absolute_uri(image_url)
         return image_url
+
+
+class DistributorRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DistributorRequest
+        fields = [
+            'id',
+            'company',
+            'contact_name',
+            'email',
+            'phone',
+            'company_address',
+            'message',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']

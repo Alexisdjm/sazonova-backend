@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Recipe, Ingredient, PreparationStep
+from .models import Recipe, Ingredient, PreparationStep, DistributorRequest
 
 class IngredientInline(admin.TabularInline):
     model = Ingredient
@@ -16,3 +16,11 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
     inlines = [IngredientInline, PreparationStepInline]
+
+
+@admin.register(DistributorRequest)
+class DistributorRequestAdmin(admin.ModelAdmin):
+    list_display = ('contact_name', 'company', 'email', 'phone', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('contact_name', 'company', 'email', 'phone')
+    readonly_fields = ('created_at',)

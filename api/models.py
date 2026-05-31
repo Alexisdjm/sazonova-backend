@@ -15,7 +15,7 @@ class Recipe(models.Model):
     meal_type = models.CharField(max_length=3, choices=MEAL_CHOICES, verbose_name="Tipo de comida")
     preparation_time = models.CharField(max_length=100, verbose_name="Tiempo de preparación (ej: 30 minutos)", blank=True)
     is_featured = models.BooleanField(default=False, verbose_name="Destacada", help_text="Marcar para que aparezca en recetas populares.")
-    
+
     # Optional but recommended fields:
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -28,6 +28,19 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_meal_type_display()})"
+
+class DistributorRequest(models.Model):
+    company = models.CharField(max_length=200, blank=True)
+    contact_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=30)
+    email = models.EmailField()
+    company_address = models.TextField()
+    message = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.contact_name} — {self.company or self.email}"
 
 class Ingredient(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)

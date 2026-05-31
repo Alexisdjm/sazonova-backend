@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RecipeViewSet, api_overview
+from .views import RecipeViewSet, api_overview, distributor_request_create
 
 router = DefaultRouter()
 router.register(r'recipes', RecipeViewSet, basename='recipe')
 
 urlpatterns = [
     path('', api_overview, name='api-overview'),
+    path('distributors/', distributor_request_create, name='distributor-request-create'),
     path('', include(router.urls)),
 ]

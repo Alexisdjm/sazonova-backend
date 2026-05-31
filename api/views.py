@@ -1,8 +1,14 @@
-from rest_framework import viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+import logging
+
 from .models import Recipe
-from .serializers import RecipeSerializer
+from .serializers import RecipeSerializer, DistributorRequestSerializer
+from .services.brevo import BrevoEmailError, send_distributor_request_notification
+
+logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def api_overview(request):
@@ -18,8 +24,38 @@ def api_overview(request):
         '5. Solo Almuerzos': '/api/recipes/almuerzos/',
         '6. Solo Cenas': '/api/recipes/cenas/',
         '7. Solo Entradas o Refrigerios': '/api/recipes/entradas/',
+        '8. Solicitud de distribuidor (POST)': '/api/distributors/',
     }
     return Response(api_urls)
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def distributor_request_create(request):
+    """
+    Recibe el formulario de distribuidor desde el frontend y guarda la solicitud.
+    """
+    serializer = DistributorRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        distributor_request = serializer.save()
+
+        email_sent = False
+        email_error = None
+        try:
+            send_distributor_request_notification(distributor_request)
+            email_sent = True
+        except BrevoEmailError as exc:
+            email_error = str(exc)
+            logger.error('No se pudo enviar el correo de distribuidor: %s', exc)
+
+        response_data = serializer.data
+        response_data['email_sent'] = email_sent
+        if email_error:
+            response_data['email_error'] = email_error
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
