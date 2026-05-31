@@ -23,6 +23,8 @@ class Recipe(models.Model):
         verbose_name='Imagen para la página de detalle',
     )
     name = models.CharField(max_length=200, verbose_name='Nombre')
+    calories = models.IntegerField(verbose_name='Calorías', default=300)
+    portions = models.IntegerField(verbose_name='Porciones', default=1)
     slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name='URL Slug')
     description = models.TextField(blank=True, verbose_name='Descripción')
     meal_type = models.CharField(max_length=3, choices=MEAL_CHOICES, verbose_name='Tipo de comida')
