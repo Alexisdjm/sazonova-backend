@@ -1,33 +1,60 @@
 from rest_framework import serializers
+
 from .models import Recipe, Ingredient, PreparationStep, DistributorRequest
+
+
+def _absolute_image_url(obj, field_name, serializer):
+    image_field = getattr(obj, field_name, None)
+    if not image_field:
+        return None
+    image_url = image_field.url
+    request = serializer.context.get('request')
+    if request is not None:
+        return request.build_absolute_uri(image_url)
+    return image_url
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ['id', 'name', 'quantity']
+        fields = ['id', 'text']
+
 
 class PreparationStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreparationStep
         fields = ['id', 'fase_name', 'show_name', 'step_number', 'instruction']
 
+
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True, read_only=True)
     steps = PreparationStepSerializer(many=True, read_only=True)
-    recipe_image = serializers.SerializerMethodField()
+    card_image = serializers.SerializerMethodField()
+    detailed_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'slug', 'meal_type', 'preparation_time', 'recipe_image', 'is_featured', 'created_at', 'updated_at', 'ingredients', 'steps']
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'description',
+            'meal_type',
+            'preparation_time',
+            'card_image',
+            'detailed_image',
+            'is_featured',
+            'created_at',
+            'updated_at',
+            'ingredients',
+            'steps',
+        ]
 
-    def get_recipe_image(self, obj):
-        if not obj.recipe_image:
-            return None
-        image_url = obj.recipe_image.url
-        request = self.context.get('request')
-        if request is not None:
-            return request.build_absolute_uri(image_url)
-        return image_url
+    def get_card_image(self, obj):
+        return _absolute_image_url(obj, 'card_image', self)
+
+    def get_detailed_image(self, obj):
+        return _absolute_image_url(obj, 'detailed_image', self)
 
 
 class DistributorRequestSerializer(serializers.ModelSerializer):

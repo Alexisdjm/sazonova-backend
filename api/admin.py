@@ -13,9 +13,17 @@ class PreparationStepInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'meal_type', 'is_featured', 'created_at')
     list_filter = ('meal_type', 'is_featured')
-    search_fields = ('name',)
+    search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [IngredientInline, PreparationStepInline]
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug', 'description', 'meal_type', 'preparation_time', 'is_featured'),
+        }),
+        ('Imágenes', {
+            'fields': ('card_image', 'detailed_image'),
+        }),
+    )
 
 
 @admin.register(DistributorRequest)
