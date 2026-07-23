@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Recipe, Ingredient, PreparationStep, DistributorRequest
+from .models import Recipe, Ingredient, PreparationStep, DistributorRequest, Product
 
 
 def _absolute_image_url(obj, field_name, serializer):
@@ -71,3 +71,29 @@ class DistributorRequestSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    nutritional_info = serializers.SerializerMethodField()
+    ingredients = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'description',
+            'quantity',
+            'ingredients',
+            'nutritional_info',
+            'product_details',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_nutritional_info(self, obj):
+        return _absolute_image_url(obj, 'nutritional_info', self)
+
+    def get_ingredients(self, obj):
+        return obj.ingredient_list()

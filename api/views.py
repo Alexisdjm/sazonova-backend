@@ -4,8 +4,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 import logging
 
-from .models import Recipe
-from .serializers import RecipeSerializer, DistributorRequestSerializer
+from .models import Recipe, Product
+from .serializers import RecipeSerializer, DistributorRequestSerializer, ProductSerializer
 from .services.brevo import BrevoEmailError, send_distributor_request_notification
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,8 @@ def api_overview(request):
         '6. Solo Cenas': '/api/recipes/cenas/',
         '7. Solo Entradas o Refrigerios': '/api/recipes/entradas/',
         '8. Solicitud de distribuidor (POST)': '/api/distributors/',
+        '9. Todos los productos': '/api/products/all/',
+        '10. Producto individual (por slug)': '/api/products/<slug>/',
     }
     return Response(api_urls)
 
@@ -56,6 +58,18 @@ def distributor_request_create(request):
 
         return Response(response_data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ProductSerializer
+    lookup_field = 'slug'
+    queryset = Product.objects.all().order_by('name')
+
+    @action(detail=False, methods=['get'])
+    def all(self, request):
+        products = self.get_queryset()
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer

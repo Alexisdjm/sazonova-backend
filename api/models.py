@@ -65,6 +65,56 @@ class DistributorRequest(models.Model):
         return f'{self.contact_name} — {self.company or self.email}'
 
 
+class Product(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Nombre')
+    slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name='URL Slug')
+    description = models.TextField(verbose_name='Descripción')
+    quantity = models.CharField(
+        max_length=100,
+        verbose_name='Cantidad',
+        help_text='Ej: 250 g, 1 unidad, 500 ml',
+    )
+    ingredients = models.TextField(
+        verbose_name='Ingredientes',
+        help_text='Un ingrediente por línea, o separados por coma.',
+    )
+    nutritional_info = models.ImageField(
+        upload_to='products/nutrition/',
+        null=True,
+        blank=True,
+        verbose_name='Información nutricional (imagen)',
+    )
+    product_details = models.TextField(
+        blank=True,
+        verbose_name='Detalles del producto',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name).replace('-', '_')
+        super().save(*args, **kwargs)
+
+    def ingredient_list(self):
+        """Parsea el textarea en una lista (líneas o comas)."""
+        raw = (self.ingredients or '').replace('\r\n', '\n').replace('\r', '\n')
+        items = []
+        for line in raw.split('\n'):
+            for part in line.split(','):
+                item = part.strip()
+                if item:
+                    items.append(item)
+        return items
+
+    def __str__(self):
+        return self.name
+
+
 class Ingredient(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     text = models.CharField(
