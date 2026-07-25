@@ -1,13 +1,26 @@
 from django.contrib import admin
-from .models import Recipe, Ingredient, PreparationStep, DistributorRequest, Product
+from django.core.exceptions import ValidationError
+
+from .models import Recipe, Ingredient, PreparationStep, DistributorRequest, Product, ProductImage
+
 
 class IngredientInline(admin.TabularInline):
     model = Ingredient
     extra = 1
 
+
 class PreparationStepInline(admin.TabularInline):
     model = PreparationStep
     extra = 1
+
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    max_num = ProductImage.MAX_IMAGES_PER_PRODUCT
+    ordering = ('order', 'id')
+    fields = ('image', 'order')
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
@@ -36,9 +49,10 @@ class DistributorRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'quantity', 'created_at')
+    list_display = ('name', 'slug', 'quantity', 'image_count', 'created_at')
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
+    inlines = [ProductImageInline]
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'description', 'quantity'),
@@ -51,3 +65,23 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('nutritional_info',),
         }),
     )
+
+    @admin.display(description='Imágenes')
+    def image_count(self, obj):
+        return obj.images.count()
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is ProductImage:
+            total = 0
+            for form_item in formset.forms:
+                if not hasattr(form_item, 'cleaned_data') or not form_item.cleaned_data:
+                    continue
+                if form_item.cleaned_data.get('DELETE'):
+                    continue
+                if form_item.cleaned_data.get('image') or form_item.instance.pk:
+                    total += 1
+            if total > ProductImage.MAX_IMAGES_PER_PRODUCT:
+                raise ValidationError(
+                    f'Solo se permiten hasta {ProductImage.MAX_IMAGES_PER_PRODUCT} imágenes por producto.'
+                )
+        super().save_formset(request, form, formset, change)

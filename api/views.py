@@ -62,7 +62,7 @@ def distributor_request_create(request):
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
     lookup_field = 'slug'
-    queryset = Product.objects.all().order_by('name')
+    queryset = Product.objects.prefetch_related('images').order_by('name')
 
     @action(detail=False, methods=['get'])
     def all(self, request):
@@ -95,7 +95,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     def retrieve(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
-        
+
         # Diccionario para mapear las URLs que pediste con los códigos de base de datos
         categories = {
             'desayunos': 'DES',
@@ -103,12 +103,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'cenas': 'CEN',
             'entradas': 'ROE'
         }
-        
+
         # Si el slug que consultan coincide con uno de nuestros tipos de comida, filtramos y devolvemos la lista
         if slug in categories:
             recipes = Recipe.objects.filter(meal_type=categories[slug]).order_by('-created_at')
             serializer = self.get_serializer(recipes, many=True)
             return Response(serializer.data)
-            
+
         # Si no es ninguna de esas palabras, asumimos que es una receta individual y dejamos que DRF haga lo suyo
         return super().retrieve(request, *args, **kwargs)

@@ -115,6 +115,34 @@ class Product(models.Model):
         return self.name
 
 
+class ProductImage(models.Model):
+    MAX_IMAGES_PER_PRODUCT = 6
+
+    product = models.ForeignKey(
+        Product,
+        related_name='images',
+        on_delete=models.CASCADE,
+        verbose_name='Producto',
+    )
+    image = models.ImageField(
+        upload_to='products/gallery/',
+        verbose_name='Imagen',
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name='Orden',
+        help_text='Menor número = aparece primero. La primera es la principal.',
+    )
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Imagen del producto'
+        verbose_name_plural = 'Imágenes del producto'
+
+    def __str__(self):
+        return f'{self.product.name} — imagen {self.order}'
+
+
 class Ingredient(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     text = models.CharField(
