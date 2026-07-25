@@ -24,14 +24,23 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'meal_type', 'is_featured', 'created_at')
+    list_display = ('name', 'slug', 'meal_type', 'calories', 'portions', 'is_featured', 'created_at')
     list_filter = ('meal_type', 'is_featured')
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [IngredientInline, PreparationStepInline]
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'description', 'meal_type', 'preparation_time', 'is_featured'),
+            'fields': (
+                'name',
+                'slug',
+                'description',
+                'meal_type',
+                'preparation_time',
+                'calories',
+                'portions',
+                'is_featured',
+            ),
         }),
         ('Imágenes', {
             'fields': ('card_image', 'detailed_image'),

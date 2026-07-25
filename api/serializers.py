@@ -41,6 +41,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'description',
             'meal_type',
             'preparation_time',
+            'calories',
+            'portions',
             'card_image',
             'detailed_image',
             'is_featured',
